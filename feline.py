@@ -45,11 +45,12 @@ if __name__ == '__main__':
 
         while True:
             response = gemini.get_chat_response(model, prompt)
+            print()
                 
             for chunk in response:
                 print(chunk.text, end='')
                 
-            print('\n**Press Return to exit if satisfied.**')
+            print('\n**Press Return to exit if satisfied.**\n')
             prompt = input('> [PROMPT IN]: ')
 
             if not prompt: break
