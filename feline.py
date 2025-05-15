@@ -5,6 +5,8 @@ from lib.argparser import ArgParser
 from lib.imageparser import ImageParser
 from lib.gemini import Gemini
 from os import getenv
+from lib.prompt_io import format_in
+from lib.prompt_io import print_output_header
 
 if __name__ == '__main__':
     # Arguments
@@ -22,6 +24,8 @@ if __name__ == '__main__':
         gemini = Gemini(api_key=api_key)
     
     # Processing
+    prompt = format_in(args.message)
+
     # Image recognition
     if args.image:
         model = 'gemini-2.0-flash'
@@ -32,27 +36,24 @@ if __name__ == '__main__':
         response = gemini.get_response(model, contents)
 
         # Output
+        print_output_header()
         for chunk in response:
             print(chunk.text, end='')
         
-    
     else:
         # Text recognition
         if args.deeper: model='gemini-2.0-flash'
         else: model = 'gemini-2.0-flash-lite'
 
-        prompt = args.message
-
         while True:
             response = gemini.get_chat_response(model, prompt)
-            print()
+            print_output_header()
                 
             for chunk in response:
                 print(chunk.text, end='')
                 
-            print('\n**Press Return to exit if satisfied.**\n')
-            prompt = input('> [PROMPT IN]: ')
+            print('\n**Press Return 2 times to exit**\n')
+            prompt = format_in()
 
-            if not prompt: break
-            else: continue
-
+            if not prompt:
+                break
