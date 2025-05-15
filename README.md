@@ -49,3 +49,6 @@ alias feline="$FELINE_DIR/wrapper.sh"
 
 - Image recognition
 `feline "How many animals do you see in the image?" --image [path/to/image1.png]`
+
+- Extra utils: Can process standard output (as translator for example):
+`feline translate me into Klingon $(man chmod)`

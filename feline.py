@@ -24,7 +24,7 @@ if __name__ == '__main__':
         gemini = Gemini(api_key=api_key)
     
     # Processing
-    prompt = format_in(args.message)
+    prompt = args.message
 
     # Image recognition
     if args.image:
