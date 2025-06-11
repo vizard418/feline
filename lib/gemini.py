@@ -9,11 +9,11 @@ class Gemini(Client):
 
     AVAILABLE_MODELS = {
         'flash' : 'gemini-2.0-flash',
-        'flash-lite' : 'gemini-2.0-flash-lite',
-        'flash-preview' : 'gemini-2.5-flash-preview-05-20'
+        'lite' : 'gemini-2.0-flash-lite',
+        'preview' : 'gemini-2.5-flash-preview-05-20'
     }
 
-    DEFAULT_MODEL = AVAILABLE_MODELS['flash-lite']
+    DEFAULT_MODEL = AVAILABLE_MODELS['lite']
 
 
     def __init__(self, api:str):

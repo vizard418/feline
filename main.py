@@ -59,59 +59,62 @@ def get_response(agent, prompt):
     except ServerError:
         print(MultilineIn.LABEL_ERROR, 'Server Error')
     else:
-        display_response(response)
+        return response
 
 
 if __name__ == '__main__':
-    # arguments
-    parser = ArgParser(Gemini.AVAILABLE_MODELS.keys())
+    # argument parser
+    parser = ArgParser()
+    parser.set_models(Gemini.AVAILABLE_MODELS)
+
     args = parser.parse_args()
 
-    # history
-    if args.clear:
-        History.clear_input()
+    # history manager
+    if args.clear: History.clear_input()
 
-    # agent init
-    feline = Gemini(api=get_api_key(Gemini.API_VARNAME))
+    # agent initialize
+    if args.message or args.interactive:
+        feline = Gemini(api=get_api_key(Gemini.API_VARNAME))
 
-    if args.model:
-        feline.model = Gemini.AVAILABLE_MODELS[args.model]
+        if args.model:
+            feline.model = Gemini.AVAILABLE_MODELS[args.model]
 
-    # chat
-    loop = True
-
-    while loop:
-        History.check_dir()
-
-        # non-interactive mode
         if args.message:
-            user_input = args.message
-            loop = False
+            user_input= ' '.join(args.message)
+        else: user_input= ''
 
-        else:
-            user_input = get_input(History.HISTORY_INPUT)
+        loop = True
+        while loop:
+            History.check_dir()
 
+            if not args.interactive: loop=False
             if not user_input:
-                print(); break
+                user_input = get_input(History.HISTORY_INPUT)
 
-        # prompt instructions handler
-        command_expand, images_locations = parse_instructions(user_input)
-        if command_expand:
-            user_input = '%s\n%s' % (user_input, command_expand)
+                if not user_input: print(); break
 
-        # image recognition
-        if images_locations:
-            prompt_contents = load_images(images_locations)
+            # prompt instructions handler
+            command_expand, images_locations = parse_instructions(user_input)
+            if command_expand:
+                user_input = '%s\n%s' % (user_input, command_expand)
 
-            if not prompt_contents:
-                prompt_contents = user_input
-            else:
-                prompt_contents.insert(0, user_input)
+            # image recognition
+            if images_locations:
+                prompt_contents = load_images(images_locations)
+
+                if not prompt_contents:
+                    prompt_contents = user_input
+                else:
+                    prompt_contents.insert(0, user_input)
         
-        # text recognition
-        else:
-            prompt_contents = user_input
+            # text recognition
+            else:
+                prompt_contents = user_input
 
-        # text generation
-        response = get_response(feline, prompt_contents)
+            # text generation
+            display_response(get_response(feline, prompt_contents))
+            user_input = ''
+
+    else:
+        parser.print_help()
 
