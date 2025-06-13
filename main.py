@@ -8,6 +8,7 @@ from lib.multiline_in import MultilineIn
 from lib.cmdhandler import CmdHandler
 from lib.imageparser import ImageParser
 from lib.history import History
+from lib.speech import Speech
 
 
 def get_api_key(varname:str) ->str:
@@ -15,7 +16,6 @@ def get_api_key(varname:str) ->str:
 
     if not api_key:
         raise NameError('Error loading %s' % varname)
-
     else: return api_key
 
 
@@ -44,24 +44,6 @@ def load_images(images_filenames:list) ->list[bytes]:
     return images
 
 
-def display_response(response) ->None:
-    print('\n' + MultilineIn.LABEL_OUT)
-
-    for chunk in response:
-        print(chunk.text, end='')
-
-    print('\n---')
-
-
-def get_response(agent, prompt):
-    try:
-        response = agent.get_chat_stream(prompt_contents)
-    except ServerError:
-        print(MultilineIn.LABEL_ERROR, 'Server Error')
-    else:
-        return response
-
-
 if __name__ == '__main__':
     # argument parser
     parser = ArgParser()
@@ -83,6 +65,7 @@ if __name__ == '__main__':
             user_input= ' '.join(args.message)
         else: user_input= ''
 
+        # turn based chat
         loop = True
         while loop:
             History.check_dir()
@@ -112,9 +95,35 @@ if __name__ == '__main__':
                 prompt_contents = user_input
 
             # text generation
-            display_response(get_response(feline, prompt_contents))
-            user_input = ''
+            response_chunks = []
+            response = feline.get_chat_stream(prompt_contents)
 
+            print('\n' + MultilineIn.LABEL_OUT)
+
+            for chunk in response:
+                print(chunk.text, end='')
+                response_chunks.append(chunk)
+            
+            print('\n---')
+
+            # speech generation
+            if args.text_to_speech:
+                confirm = input('$> Proceed playback? (Y/n): ')
+
+                if confirm.lower() in ('', 'y', 'yes'):
+                    try:
+                        speach_data = feline.generate_speach(response_chunks)
+                        
+                        wav_dir = str(History.CACHE_DIR)
+                        wav_name = Speech.get_wavfilename()
+                        wav_path = f'{wav_dir}/{wav_name}'
+                    
+                        Speech.export_wav(wav_path, speach_data)
+                        Speech.play_wav(wav_path)
+
+                    except: pass
+
+            user_input = ''
     else:
         parser.print_help()
 

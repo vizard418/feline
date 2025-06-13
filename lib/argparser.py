@@ -15,6 +15,9 @@ class ArgParser(ArgumentParser):
         self.add_argument('--interactive', '-it', action='store_true',
             required=False, help='Interactive chat mode')
 
+        self.add_argument('--text-to-speech', '-tts', action='store_true',
+            required=False, help='Speech generation (text-to-speech)')
+
         self.add_argument('--clear', action='store_true', required=False,
             help='Clear history')
 
